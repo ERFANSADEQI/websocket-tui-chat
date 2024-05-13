@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"bufio"
 	"log"
 	"strings"
 	"os"
@@ -81,4 +82,17 @@ func (m model) View() string {
 	}
 	view += fmt.Sprintf("> %s", m.input)
 	return view
+}
+
+func main() {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter topic: ")
+	topic, _ := reader.ReadString('\n')
+	topic = strings.TrimSpace(topic)
+
+	m := model{topic: topic}
+	p := tea.NewProgram(m)
+	if err := p.Start(); err != nil {
+		log.Fatalf("خطایی رخ داده است: %v", err)
+	}
 }
