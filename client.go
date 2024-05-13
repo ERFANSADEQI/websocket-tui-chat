@@ -15,3 +15,7 @@ type model struct {
 	input string
 }
 
+type msgReceived string
+
+
+
