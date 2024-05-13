@@ -16,7 +16,6 @@ type model struct {
 }
 
 type msgReceived string
-type sendMessage string
 
 func initialModel() model {
 	return model{}
@@ -25,4 +24,6 @@ func initialModel() model {
 func (m model) Init() tea.Cmd {
     return nil
 }
+
+
 
