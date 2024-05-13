@@ -49,7 +49,7 @@ func publish(topic string, msg []byte) {
 	}
 }
 
-func startServer() {
+func main() {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
 	router.GET("/ws/:topic", func(c *gin.Context) {
