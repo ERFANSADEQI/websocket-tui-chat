@@ -9,3 +9,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type model struct {
+	topic string 
+	messages []string 
+	input string
+}
+
