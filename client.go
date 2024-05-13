@@ -17,5 +17,7 @@ type model struct {
 
 type msgReceived string
 
-
+func initialModel() model {
+	return model{}
+}
 
