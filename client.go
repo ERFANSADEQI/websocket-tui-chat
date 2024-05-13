@@ -21,3 +21,7 @@ func initialModel() model {
 	return model{}
 }
 
+func (m model) Init() tea.Cmd {
+    return nil
+}
+
