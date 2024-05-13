@@ -16,6 +16,7 @@ type model struct {
 }
 
 type msgReceived string
+type sendMessage string
 
 func initialModel() model {
 	return model{}
