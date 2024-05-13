@@ -55,3 +55,22 @@ func sendMessage(input string, topic string) {
         log.Println("خطا در ارسال پیام: ", err)
     }
 }
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		case "enter":
+			sendMessage(m.input, m.topic)
+			m.input = ""
+		default:
+			m.input += string(msg.Runes)
+		}
+	case msgReceived:
+		m.messages = append(m.messages, string(msg))
+	}
+	return m, nil
+}
+
