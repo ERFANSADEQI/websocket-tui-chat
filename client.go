@@ -33,5 +33,17 @@ func connectToWebsocketServer(topic string) *websocket.Conn {
     return conn
 }
 
+func listenForMessages(m *model, topic string) {
+    conn := connectToWebsocketServer(topic)
+    defer conn.Close()
 
+    for {
+        _, msg, err := conn.ReadMessage()
+        if err != nil {
+            log.Println("خطا در خواندن پیام: ", err)
+            break 
+        }
+        m.messages = append(m.messages, string(msg))
+    }
+}
 
