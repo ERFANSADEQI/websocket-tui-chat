@@ -47,3 +47,11 @@ func listenForMessages(m *model, topic string) {
     }
 }
 
+func sendMessage(input string, topic string) {
+    conn := connectToWebsocketServer(topic)
+    defer conn.Close()
+
+    if err := conn.WriteMessage(websocket.TextMessage, []byte(input)); err != nil {
+        log.Println("خطا در ارسال پیام: ", err)
+    }
+}
