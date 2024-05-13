@@ -25,5 +25,13 @@ func (m model) Init() tea.Cmd {
     return nil
 }
 
+func connectToWebsocketServer(topic string) *websocket.Conn {
+    conn, _, err := websocket.DefaultDialer.Dial("ws://localhost:8889/ws/" + topic, nil)
+    if err != nil {
+        log.Fatal("خطا در اتصال به سرور وب سوکت: ", err)
+    }
+    return conn
+}
+
 
 
