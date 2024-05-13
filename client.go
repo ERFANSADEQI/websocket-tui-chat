@@ -74,3 +74,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+func (m model) View() string {
+	view := fmt.Sprintf("Topic: %s\n\n", m.topic)
+	for _, msg := range m.messages {
+		view += fmt.Sprintf("%s\n", msg)
+	}
+	view += fmt.Sprintf("> %s", m.input)
+	return view
+}
