@@ -11,50 +11,41 @@ import (
 )
 
 type model struct {
-	topic string 
-	messages []string 
-	input string
+	topic    string
+	messages []string
+	input    string
+	conn     *websocket.Conn
+	err      error
 }
 
-type msgReceived string
-
-func initialModel() model {
-	return model{}
+func initialModel(topic string) model {
+	conn, _, err := websocket.DefaultDialer.Dial("ws://localhost:8889/ws/" + topic, nil)
+	if err != nil {
+		log.Fatal("خطا در اتصال به سرور وب سوکت: ", err)
+	}
+	return model{topic: topic, conn: conn}
 }
 
 func (m model) Init() tea.Cmd {
-    return nil
+	return listenForMessages(m.conn)
 }
 
-func connectToWebsocketServer(topic string) *websocket.Conn {
-    conn, _, err := websocket.DefaultDialer.Dial("ws://localhost:8889/ws/" + topic, nil)
-    if err != nil {
-        log.Fatal("خطا در اتصال به سرور وب سوکت: ", err)
-    }
-    return conn
+func listenForMessages(conn *websocket.Conn) tea.Cmd {
+	return func() tea.Msg {
+		for {
+			_, msg, err := conn.ReadMessage()
+			if err != nil {
+				return tea.Quit
+			}
+			return msgReceived(msg)
+		}
+	}
 }
 
-func listenForMessages(m *model, topic string) {
-    conn := connectToWebsocketServer(topic)
-    defer conn.Close()
-
-    for {
-        _, msg, err := conn.ReadMessage()
-        if err != nil {
-            log.Println("خطا در خواندن پیام: ", err)
-            break 
-        }
-        m.messages = append(m.messages, string(msg))
-    }
-}
-
-func sendMessage(input string, topic string) {
-    conn := connectToWebsocketServer(topic)
-    defer conn.Close()
-
-    if err := conn.WriteMessage(websocket.TextMessage, []byte(input)); err != nil {
-        log.Println("خطا در ارسال پیام: ", err)
-    }
+func sendMessage(conn *websocket.Conn, input string) {
+	if err := conn.WriteMessage(websocket.TextMessage, []byte(input)); err != nil {
+		log.Println("خطا در ارسال پیام: ", err)
+	}
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -64,7 +55,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "ctrl+c", "q":
 			return m, tea.Quit
 		case "enter":
-			sendMessage(m.input, m.topic)
+			sendMessage(m.conn, m.input)
 			m.input = ""
 		default:
 			m.input += string(msg.Runes)
@@ -72,7 +63,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case msgReceived:
 		m.messages = append(m.messages, string(msg))
 	}
-	return m, nil
+	return m, listenForMessages(m.conn)
 }
 
 func (m model) View() string {
@@ -84,14 +75,15 @@ func (m model) View() string {
 	return view
 }
 
+type msgReceived []byte
+
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter topic: ")
 	topic, _ := reader.ReadString('\n')
 	topic = strings.TrimSpace(topic)
 
-	m := model{topic: topic}
-	p := tea.NewProgram(m)
+	p := tea.NewProgram(initialModel(topic))
 	if err := p.Start(); err != nil {
 		log.Fatalf("خطایی رخ داده است: %v", err)
 	}
